@@ -1,0 +1,14 @@
+#环境密匙文件
+.env
+#Python缓存
+_pycache_/
+*.pyc
+*.pyo 
+*.pyd
+#虚拟环境
+venv/
+env/
+#向量数据库
+chroma_db/
+#日志
+*.log
