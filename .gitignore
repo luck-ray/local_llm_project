@@ -12,3 +12,7 @@ env/
 chroma_db/
 #日志
 *.log
+docs/dev_log_full.md
+
+data/
+chroma_db/

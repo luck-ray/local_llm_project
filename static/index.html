@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG知识库问答系统</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 20px auto; padding: 10px; }
+        #model-select, #user-input { padding: 8px; margin-right: 10px; font-size: 14px; }
+        #user-input { width: 60%; }
+        #send-btn { padding: 8px 15px; font-size: 14px; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 4px; }
+        #send-btn:hover { background-color: #0056b3; }
+        #chat-box { margin-top: 20px; border: 1px solid #ccc; padding: 10px; min-height: 200px; border-radius: 4px; background-color: #f9f9f9; }
+        .message { margin-bottom: 10px; padding: 8px; border-radius: 4px; }
+        .user-msg { background-color: #d1e7dd; text-align: right; }
+        .ai-msg { background-color: #e2e3e5; text-align: left; }
+    </style>
+    </style>
+</head>
+<body>
+    <h1>AI-RAG私有知识库问答</h1>
+    <div>
+        <label for="model-select">选择模型：</label>
+        <select id="model-select">
+            <option value="rag">RAG 检索问答</option>
+            <option value="cloud">云端（DeepSeek）</option>
+            <option value="local">本地（Qwen）</option>
+        </select>
+    </div>
+    <div>
+        <input type="text" id="user-input" placeholder="请输入你的问题..."/>
+        <button id="send-btn">发送</button>
+    </div>
+    <button id="clear-btn" style="margin-top: 10px; padding: 6px 12px; cursor: pointer; background-color: #dc3545; color: white; border: none; border-radius: 4px;">清空聊天记录</button>
+    <div id="chat-box"></div>
+    <script>
+        // 1. 获取页面上的关键元素
+        const sendBtn = document.getElementById("send-btn");
+        const userInput = document.getElementById("user-input");
+        const modelSelect = document.getElementById("model-select");
+        const chatBox = document.getElementById("chat-box");
+
+        // 2. 点击发送按钮触发请求
+        sendBtn.addEventListener("click", async () => {
+            const message = userInput.value.trim();
+            const model = modelSelect.value;
+
+            if (!message) return;
+
+            appendMessage("user", message);
+            userInput.value = "";
+
+            //优化1：点击后立刻禁用按钮，防止用户狂点
+            sendBtn.disabled = true;
+            sendBtn.textContent = "思考中...";
+            sendBtn.style.backgroundColor = "#999"; // 变成灰色
+
+            try {
+                const response = await fetch("http://127.0.0.1:8000/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: message, model: model })
+                });
+
+                const data = await response.json();
+                appendMessage("ai", data.answer);
+            } catch (error) {
+                appendMessage("ai", "请求失败：请检查后端服务是否启动。错误：" + error.message);
+            } finally {
+                //优化2：无论成功还是失败，最后都要恢复按钮，否则网页就彻底没法用了
+                sendBtn.disabled = false;
+                sendBtn.textContent = "发送";
+                sendBtn.style.backgroundColor = "#007bff"; // 恢复原来的蓝色
+            }
+        });
+            //实现回车发送
+            userInput.addEventListener("keydown",(event)=>{
+                if(event.key==="Enter"){
+                    event.preventDefault();     //阻止回车默认的换行行为
+                    sendBtn.click();        //触发发送按钮的点击
+                }
+            })
+        // 4. 辅助函数：往聊天框里追加气泡
+        function appendMessage(role, text) {
+            const msgDiv = document.createElement("div");
+            msgDiv.className = "message " + (role === "user" ? "user-msg" : "ai-msg");
+            msgDiv.textContent = text;
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight; // 自动滚动到最下方
+        }
+         // 获取清空按钮，并绑定点击事件
+                // 加上防错机制，避免找不到按钮时整个JS崩溃
+        const clearBtn = document.getElementById("clear-btn");
+        if (clearBtn) {
+            clearBtn.addEventListener("click", () => {
+                chatBox.innerHTML = "";
+                console.log("聊天记录已清空");
+            })
+        }
+    </script>
+</body>
+</html>
