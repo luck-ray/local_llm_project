@@ -13,6 +13,6 @@ chroma_db/
 #日志
 *.log
 docs/dev_log_full.md
-
-data/demo.txt
+data/*
+!data/demo.txt
 chroma_db/
