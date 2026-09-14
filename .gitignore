@@ -14,5 +14,5 @@ chroma_db/
 *.log
 docs/dev_log_full.md
 
-data/
+data/demo.txt
 chroma_db/
