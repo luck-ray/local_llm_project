@@ -16,3 +16,5 @@ docs/dev_log_full.md
 data/*
 !data/demo.txt
 chroma_db/
+#模型
+models/

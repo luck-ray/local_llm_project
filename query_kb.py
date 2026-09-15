@@ -18,7 +18,7 @@ def search_kb(query):
     print("正在打开文件柜...")
     
     embeddings=HuggingFaceEmbeddings(
-    model_name=r"D:\models\bge-small-zh-v1.5",
+    model_name=r"D:\ai_work\local_llm_project\models\bge-small-zh-v1.5",
     model_kwargs={'device':'cpu'}
 )
 #打开已有向量库
@@ -30,7 +30,7 @@ def search_kb(query):
     print(f"\n正在检索:{query}")
     #核心方法：similarity_search(相似度搜索)
     #k=3意思是找出三个文本片段
-    results=db.similarity_search(query,k=3)
+    results=db.similarity_search(query,k=5)
     print(f"检索到{len(results)}个相关片段。")
 
     for i, doc in enumerate(results):
@@ -68,6 +68,6 @@ def ask_rag(query,model="cloud"):
 #测试
 if __name__=="__main__":
     #提个问题
-    user_question="简要总结一下9月13日的报错情况"
+    user_question="告诉我相机识别失败怎么办"
     final_answer=ask_rag(user_question,model="cloud")
     print("\n最终回答：\n",final_answer)        

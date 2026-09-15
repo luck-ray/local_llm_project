@@ -11,6 +11,7 @@ from langchain_community.vectorstores import Chroma         #引入Chroma数据�
 from langchain_huggingface import HuggingFaceEmbeddings         #引入嵌入模型
 from pathlib import Path
 import shutil
+import re
 
 #获取当前脚本所在文件夹
 BASE_DIR=Path(__file__).resolve().parent
@@ -82,7 +83,7 @@ def build_vector_db():
     print("3.正在加载嵌入模型（首次运行需下载，请耐心等待）...")
     #把文字转化为数学向量
     embeddings=HuggingFaceEmbeddings(
-        model_name=r"D:\models\bge-small-zh-v1.5",            #轻量级中文嵌入模型
+        model_name=r"D:\ai_work\local_llm_project\models\bge-small-zh-v1.5",            #轻量级中文嵌入模型
         model_kwargs={'device':'cpu'}           #先放在cpu跑，不吃显存
     )
 

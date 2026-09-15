@@ -31,6 +31,11 @@
         <input type="text" id="user-input" placeholder="请输入你的问题..."/>
         <button id="send-btn">发送</button>
     </div>
+        <!-- 新增：图片上传区域 -->
+    <div style="margin-top: 10px;">
+        <input type="file" id="image-input" accept="image/*" />
+        <button id="upload-btn" style="padding: 6px 12px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">上传并识别图片</button>
+    </div>
     <button id="clear-btn" style="margin-top: 10px; padding: 6px 12px; cursor: pointer; background-color: #dc3545; color: white; border: none; border-radius: 4px;">清空聊天记录</button>
     <div id="chat-box"></div>
     <script>
@@ -81,6 +86,8 @@
                 }
             })
         // 4. 辅助函数：往聊天框里追加气泡
+
+        
         function appendMessage(role, text) {
             const msgDiv = document.createElement("div");
             msgDiv.className = "message " + (role === "user" ? "user-msg" : "ai-msg");
@@ -89,7 +96,9 @@
             chatBox.scrollTop = chatBox.scrollHeight; // 自动滚动到最下方
         }
          // 获取清空按钮，并绑定点击事件
-                // 加上防错机制，避免找不到按钮时整个JS崩溃
+        
+        
+         // 加上防错机制，避免找不到按钮时整个JS崩溃
         const clearBtn = document.getElementById("clear-btn");
         if (clearBtn) {
             clearBtn.addEventListener("click", () => {
@@ -97,6 +106,49 @@
                 console.log("聊天记录已清空");
             })
         }
+
+        
+         // 处理图片上传
+        const uploadBtn = document.getElementById("upload-btn");
+        const imageInput = document.getElementById("image-input");
+
+        uploadBtn.addEventListener("click", async () => {
+            const file = imageInput.files[0];
+            if (!file) {
+                alert("请先选择一张图片！");
+                return;
+            }
+
+            // 1. 用 FormData 打包文件
+            const formData = new FormData();
+            formData.append("file", file);
+
+            // 2. 显示用户操作
+            appendMessage("user", `[上传了一张图片：${file.name}]`);
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = "识别中...";
+
+            try {
+                // 3. 发送 POST 请求给后端 /upload 接口
+                const response = await fetch("http://127.0.0.1:8000/upload", {
+                    method: "POST",
+                    body: formData  // 注意：这里不要加 Content-Type 头，浏览器会自动处理
+                });
+                
+                const data = await response.json();
+                
+                // 4. 拼接并显示 AI 结果
+                const displayText = `YOLO 视觉识别结果：${data.cv_result.join(", ")}\n\nRAG 系统建议：${data.answer}`;
+                appendMessage("ai", displayText);
+                
+            } catch (error) {
+                appendMessage("ai", "图片上传失败：" + error.message);
+            } finally {
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = "上传并识别图片";
+                imageInput.value = ""; // 清空文件选择框
+            }
+        });
     </script>
 </body>
 </html>
